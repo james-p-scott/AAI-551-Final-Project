@@ -34,7 +34,11 @@ e)	Evaluate the impact of age and demographic factors on the size and growth rat
  - TensorFlow - an open-source library developed by Google Brain to simplify the development and deployment of Machine Learning and Deep Learning models (c.f. PyTorch or Keras)
 
 ### File/Module Structure
-The main function resides in AAI-551-Final-Project.ipynb with all other classes and functions contained in .py files that are imported, as needed.
+The main function resides in AAI-551-Final-Project.ipynb with all other classes and functions contained in .py files that are imported into the proper namespace.
+
+Top Level of Hierarchy : AAI-551_Final-Project.ipynb (contains the __main__ program)
+Second Level of Hierarchy : global_internet_access.py
+Third Level of Hierarchy : file_io.py
 
 ### Python Version Used
 Python 3.14.3
