@@ -36,9 +36,9 @@ e)	Evaluate the impact of age and demographic factors on the size and growth rat
 ### File/Module Structure
 The main function resides in AAI-551-Final-Project.ipynb with all other classes and functions contained in .py files that are imported into the proper namespace.
 
-Top Level of Hierarchy : AAI-551_Final-Project.ipynb (contains the __main__ program)
-Second Level of Hierarchy : global_internet_access.py
-Third Level of Hierarchy : file_io.py
+Top Level of Hierarchy : AAI-551_Final-Project.ipynb (contains the __main__ program)<br>
+Second Level of Hierarchy : global_internet_access.py<br>
+Third Level of Hierarchy : file_io.py<br>
 
 ### Python Version Used
 Python 3.14.3
