@@ -5,7 +5,7 @@
 |---------------|--------------------------|------------|---------------|
 |      NAME     |       EMAIL ADDRESS      | STEVENS ID |    GitHub ID  |
 |---------------|--------------------------|------------|---------------|
-| Jeff Busold   | jlcbusold@icloud.com     |  20006079  |               |
+| Jeff Busold   | jbusold@stevens.edu      |  20006079  |  OverkillLC   |
 | James Scott   | james.p.scott@boeing.com |  10311319  | james-p-scott |
 | Dominick Vovk | dvovk1015@gmail.com      |  20002381  |               |
 |---------------|--------------------------|------------|---------------|
