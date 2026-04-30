@@ -209,7 +209,7 @@ class ICTSkillsDataset:
         """
         Return all rows for a specific country ISO code.
         Parameters:
-            iso (str): Three-letter country code (e.g. "USA").
+            iso (str): Three-letter country code (e.g. "CAN").
         Returns:
             DataFrame: All rows for the given country.
         Raises:
