@@ -19,9 +19,6 @@ import file_io
 from digital_skills.ict_skills_dataset import ICTSkillsDataset, SKILL_CATEGORY_FILES
 from digital_skills.digital_skills_analyzer import DigitalSkillsAnalyzer 
 
-# Countries selected for focused comparative and trend analysis
-_FOCUS_COUNTRIES = ("USA", "DEU", "BRA", "KEN", "IND", "JPN")
-
 _SKILL_LEVEL_CSV = "individuals-with-ict-skills-by-skill-level.csv"
 
 
@@ -84,8 +81,8 @@ def run_digital_literacy_analysis() -> dict:
               stats_results, and gap_countries.
     """
     print("=" * 60)
-    print("  Digital Literacy & ICT Skills Analysis")
-    print("  AAI-551 Final Project — Digital Divide")
+    print("Digital Literacy & ICT Skills Analysis")
+    print("AAI-551 Final Project — Digital Divide")
     print("=" * 60)
 
     # Step 1: Load datasets
@@ -98,7 +95,7 @@ def run_digital_literacy_analysis() -> dict:
     print("\n[2/4] Loading skill-level summary...")
     summary_df = load_skill_level_summary()
     if summary_df is not None:
-        print(f"  Skill-level summary loaded: {len(summary_df):,} rows")
+        print(f"Skill-level summary loaded: {len(summary_df):,} rows")
 
     # Step 3: Summary statistics per category
     print("\n[3/4] Summary statistics per skill category:")
@@ -107,7 +104,7 @@ def run_digital_literacy_analysis() -> dict:
         stats = ds.get_summary_stats()
         stats_results[ds.skill_category] = stats
         print(
-            f"  {ds.skill_category:<40} "
+            f"{ds.skill_category:<40} "
             f"n={stats['count']:>4}  "
             f"mean={stats['mean']:>6.2f}%  "
             f"median={stats['median']:>6.2f}%"
@@ -116,7 +113,7 @@ def run_digital_literacy_analysis() -> dict:
     # Step 4: Identify skill gaps
     print("\n[4/4] Identifying ICT skill gaps (mean < 40% across all categories)...")
     gap_countries = analyzer.identify_skill_gaps(threshold=40.0)
-    print(f"  {len(gap_countries)} countries identified with skill gaps.")
+    print(f"{len(gap_countries)} countries identified with skill gaps.")
     if gap_countries:
         print(f"  Example: {gap_countries[:8]}")
 

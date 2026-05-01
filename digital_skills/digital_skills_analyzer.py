@@ -19,7 +19,19 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from digital_skills.ict_skills_dataset import ICTSkillsDataset  # noqa: E402
+from digital_skills.ict_skills_dataset import ICTSkillsDataset 
+
+# Filename of the ITU skill-level summary dataset (basic vs above-basic per category)
+_SKILL_LEVEL_FILE = "individuals-with-ict-skills-by-skill-level.csv"
+
+# Maps the category abbreviation embedded in each seriesCode to its name
+_LEVEL_CATEGORY_MAP = {
+    "SF":  "safety",
+    "IDL": "information-and-data-literacy",
+    "DCC": "digital-content-creation",
+    "CC":  "communication-and-collaboration",
+    "PS":  "problem-solving",
+}
 
 
 class DigitalSkillsAnalyzer:
@@ -58,6 +70,9 @@ class DigitalSkillsAnalyzer:
         # Internal cache for the combined DataFrame (built lazily on first use)
         self._combined_df: pd.DataFrame | None = None
 
+        # Internal cache for the skill-level summary DataFrame (built lazily on first use)
+        self._skill_level_df: pd.DataFrame | None = None
+
 
     def __str__(self) -> str:
         """
@@ -67,7 +82,7 @@ class DigitalSkillsAnalyzer:
         """
         lines = [f"DigitalSkillsAnalyzer — {len(self.datasets)} dataset(s):"]
         for ds in self.datasets:
-            lines.append(f"  [{ds.skill_category}]  {len(ds):,} rows")
+            lines.append(f"[{ds.skill_category}]  {len(ds):,} rows")
         return "\n".join(lines)
 
     def __add__(self, other: "DigitalSkillsAnalyzer") -> "DigitalSkillsAnalyzer":
@@ -139,6 +154,32 @@ class DigitalSkillsAnalyzer:
         )
 
 
+    def _get_skill_level_df(self) -> pd.DataFrame:
+        """
+        Load and cache the ITU skill-level summary CSV, annotating each row
+        with a skill_category column and a level column (basic or above_basic).
+
+        Returns:
+            DataFrame: Annotated skill-level rows ready for aggregation.
+        """
+        if self._skill_level_df is not None:
+            return self._skill_level_df
+
+        path = os.path.join(_PROJECT_ROOT, "datasets", _SKILL_LEVEL_FILE)
+        df = pd.read_csv(path)
+        df["dataValue"] = pd.to_numeric(df["dataValue"], errors="coerce")
+        df["dataYear"] = pd.to_numeric(df["dataYear"], errors="coerce").astype("Int64")
+
+        # Extract category abbreviation and level digit from seriesCode
+        # Pattern: HHU781{CAT}{LEVEL}_HHTotalIndividual  (LEVEL is 1=basic, 2=above_basic)
+        parsed = df["seriesCode"].str.extract(r"HHU781([A-Z]+)([12])_HH")
+        df["skill_category"] = parsed[0].map(_LEVEL_CATEGORY_MAP)
+        df["level"] = parsed[1].map({"1": "basic", "2": "above_basic"})
+
+        self._skill_level_df = df.dropna(subset=["skill_category", "level"]).copy()
+        return self._skill_level_df
+
+
     def rank_countries_by_skill(
         self,
         skill_category: str,
@@ -203,7 +244,7 @@ class DigitalSkillsAnalyzer:
             .groupby("entityIso")["dataValue"]
             .mean()
         )
-        # Use a list comprehension to build the gap list (Part 2 requirement P2.2)
+        # Use a list comprehension to build the gap list
         gap_countries = [
             iso for iso, mean_val in country_means.items()
             if mean_val < threshold
@@ -220,7 +261,8 @@ class DigitalSkillsAnalyzer:
 
         Parameters:
             country_iso (str): country code (e.g. "CAN").
-            year (int | None): Optional year filter. If None, all years are averaged.
+            year (int | None): Optional year filter. If None, the latest available
+                year for each dataset is used.
         Returns:
             dict: Maps skill category name to mean proficiency percentage.
         Raises:
@@ -238,6 +280,9 @@ class DigitalSkillsAnalyzer:
             country_df = country_df[country_df["seriesParent"].isna()]
             if year is not None:
                 country_df = country_df[country_df["dataYear"] == year]
+            elif not country_df.empty:
+                latest = country_df["dataYear"].max()
+                country_df = country_df[country_df["dataYear"] == latest]
             if not country_df.empty:
                 result[ds.skill_category] = round(
                     country_df["dataValue"].astype(float).mean(), 2
@@ -248,6 +293,71 @@ class DigitalSkillsAnalyzer:
                 f"Country ISO '{country_iso}' was not found in any loaded dataset."
             )
         return result
+
+    def compare_basic_vs_above_basic(
+        self,
+        country_iso: str | None = None,
+        year: int | None = None,
+    ) -> pd.DataFrame:
+        """
+        Compare the mean percentage of the population with basic ICT skills
+        against those with above basic ICT skills for each skill category.
+
+        When neither country_iso nor year is provided the comparison reflects
+        the global average, computed using each country's latest available data.
+
+        Parameters:
+            country_iso (str | None): Optional country code.
+                If None, all countries are included.
+            year (int | None): Optional year filter. If None, the latest
+                available year is used for each country.
+        Returns:
+            DataFrame: Columns skill_category, basic, and above_basic, sorted
+                by skill_category. Values are rounded mean percentages.
+        Raises:
+            ValueError: If country_iso is not found in the skill-level data, or
+                if no data exists for the specified year.
+        """
+        df = self._get_skill_level_df()
+
+        if country_iso is not None:
+            iso_upper = country_iso.upper()
+            df = df[df["entityIso"] == iso_upper]
+            if df.empty:
+                raise ValueError(
+                    f"Country ISO '{country_iso}' was not found in the skill-level data."
+                )
+
+        if year is not None:
+            df = df[df["dataYear"] == year]
+            if df.empty:
+                raise ValueError(
+                    f"No skill-level data found for year {year}."
+                )
+        else:
+            # Keep only each country's most recent year
+            latest = df.groupby("entityIso")["dataYear"].transform("max")
+            df = df[df["dataYear"] == latest]
+
+        agg = (
+            df.groupby(["skill_category", "level"])["dataValue"]
+            .mean()
+            .reset_index()
+        )
+
+        pivot = (
+            agg
+            .pivot(index="skill_category", columns="level", values="dataValue")
+            .rename_axis(None, axis="columns")
+            .reset_index()
+        )
+
+        for col in ("basic", "above_basic"):
+            if col in pivot.columns:
+                pivot[col] = pivot[col].round(2)
+
+        return pivot.sort_values("skill_category").reset_index(drop=True)
+
 
     def analyze_skill_trends(self, country_iso: str) -> pd.DataFrame:
         """
@@ -331,7 +441,7 @@ class DigitalSkillsAnalyzer:
     def analyze_age_group_distribution(
         self,
         country_iso: str,
-        age_bands: tuple = ("15to24", "25to34", "35to44", "45to54", "55to64", "65andOver"),
+        age_bands: tuple = ("Less15","15to24", "25to74", "More74"),
     ) -> pd.DataFrame:
         """
         Analyze ICT skill proficiency across age groups for a given country.
@@ -340,13 +450,12 @@ class DigitalSkillsAnalyzer:
 
         Parameters:
             country_iso (str): country code (e.g. "CAN").
-            age_bands (tuple): Age-band label strings to query. Defaults to standard ITU bands.
+            age_bands (tuple): Immutable, age-band label strings to query. Defaults to standard ITU bands.
         Returns:
             DataFrame: Columns skill_category, age_band, and mean_value.
         Raises:
             ValueError: If no age-disaggregated data is found for the country.
         """
-        # age_bands is an immutable tuple (satisfies P1.7 immutable type requirement)
         rows = []
         iso_upper = country_iso.upper()
 
@@ -370,23 +479,29 @@ class DigitalSkillsAnalyzer:
         return pd.DataFrame(rows)
 
 
-    def plot_global_skill_distribution(self, year: int) -> matplotlib.figure.Figure:
+    def plot_global_skill_distribution(self, year: int | None = None) -> matplotlib.figure.Figure:
         """
         Plot a side-by-side bar chart of the top-10 and bottom-10 countries by mean
-        ICT skill proficiency across all loaded categories for a given year.
+        ICT skill proficiency across all loaded categories.
 
         Parameters:
-            year (int): Data year to visualize.
+            year (int | None): Data year to visualize. If None, the latest available
+                year for each country is used.
         Returns:
             Figure: matplotlib Figure object.
         Raises:
             ValueError: If no data exists for the given year.
         """
         combined = self._get_combined_totals()
-        year_df = combined[combined["dataYear"] == year]
 
-        if year_df.empty:
-            raise ValueError(f"No data found for year {year}.")
+        if year is not None:
+            year_df = combined[combined["dataYear"] == year]
+            if year_df.empty:
+                raise ValueError(f"No data found for year {year}.")
+        else:
+            # Keep only each country's most recent year
+            latest_years = combined.groupby("entityIso")["dataYear"].transform("max")
+            year_df = combined[combined["dataYear"] == latest_years]
 
         country_means = (
             year_df
@@ -399,9 +514,11 @@ class DigitalSkillsAnalyzer:
         top10 = country_means.head(10)
         bot10 = country_means.tail(10).sort_values("mean_value")
 
+        year_label = str(year) if year is not None else "Latest Available Data"
+
         fig, axes = plt.subplots(1, 2, figsize=(16, 6))
         fig.suptitle(
-            f"Global ICT Skills Distribution — Top & Bottom 10 Countries ({year})",
+            f"Global ICT Skills Distribution — Top & Bottom 10 Countries ({year_label})",
             fontsize=14,
             fontweight="bold",
         )
@@ -433,8 +550,9 @@ class DigitalSkillsAnalyzer:
         proficiency across all loaded categories for a set of countries.
 
         Parameters:
-            countries_list (list): List of ISO 3166-1 alpha-3 country codes.
-            year (int | None): Optional year filter. If None, all years are averaged.
+            countries_list (list): List of country codes.
+            year (int | None): Optional year filter. If None, the latest available
+                year is used for each country.
         Returns:
             Figure: matplotlib Figure object.
         Raises:
@@ -480,7 +598,7 @@ class DigitalSkillsAnalyzer:
         a set of countries within a specific skill category.
 
         Parameters:
-            countries_list (list): List of ISO 3166-1 alpha-3 country codes.
+            countries_list (list): List of country codes.
             skill_category (str): The skill category to visualize.
         Returns:
             Figure: matplotlib Figure object.
