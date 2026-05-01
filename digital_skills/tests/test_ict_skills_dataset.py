@@ -140,5 +140,17 @@ class TestICTSkillsDataset:
         stats = self.ds.get_summary_stats()
         assert stats["min"] <= stats["max"]
 
+    def test_get_by_age_group_returns_filtered_rows(self):
+        # get_by_age_group should return rows whose seriesCode contains the band pattern.
+        result = self.ds.get_by_age_group("15to24")
+        assert isinstance(result, pd.DataFrame)
+        if not result.empty:
+            assert result["seriesCode"].str.contains("HHC15to24").all()
+
+    def test_get_by_age_group_empty_string_raises_value_error(self):
+        # get_by_age_group with an empty string should raise ValueError.
+        with pytest.raises(ValueError):
+            self.ds.get_by_age_group("")
+
 if __name__ == "__main__":
     pytest.main(["-v", "-s", __file__])

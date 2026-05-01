@@ -299,7 +299,7 @@ class ICTSkillsDataset:
 
 if __name__ == "__main__":
     # Smoke test — loads the 'safety' category and prints a summary.
-    print("=== ICTSkillsDataset smoke test ===\n")
+    print("ICTSkillsDataset smoke test\n")
     ds = ICTSkillsDataset("safety")
     print(ds)
     print(f"\nSummary stats: {ds.get_summary_stats()}")

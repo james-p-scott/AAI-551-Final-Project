@@ -651,6 +651,46 @@ class DigitalSkillsAnalyzer:
         plt.tight_layout()
         return fig
 
+    def plot_skill_growth(self, country_iso: str) -> matplotlib.figure.Figure:
+        """
+        Plot the historical ICT skill proficiency trend for a given country
+        across all loaded skill categories, using every available data year.
+
+        Parameters:
+            country_iso (str): country code.
+        Returns:
+            Figure: matplotlib Figure object.
+        Raises:
+            ValueError: If country_iso is not found in any loaded dataset.
+        """
+        trends = self.analyze_skill_trends(country_iso)
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        for category, group in trends.groupby("skill_category"):
+            group = group.sort_values("dataYear")
+            ax.plot(
+                group["dataYear"],
+                group["mean_value"],
+                marker="o",
+                markersize=4,
+                linewidth=2,
+                label=category,
+            )
+
+        ax.set_title(
+            f"ICT Skill Growth Over Time — {country_iso.upper()}",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.set_xlabel("Year")
+        ax.set_ylabel("Mean Skill Proficiency (%)")
+        ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=100))
+        ax.legend(title="Skill Category", bbox_to_anchor=(1.02, 1), loc="upper left")
+        ax.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        return fig
+
 
 if __name__ == "__main__":
     import os, sys
