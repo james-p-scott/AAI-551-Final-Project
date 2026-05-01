@@ -113,9 +113,21 @@ def run_digital_literacy_analysis() -> dict:
     # Step 4: Identify skill gaps
     print("\n[4/4] Identifying ICT skill gaps (mean < 40% across all categories)...")
     gap_countries = analyzer.identify_skill_gaps(threshold=40.0)
+
+    # Discard any gap country that lacks at least one entry in every category CSV.
+    countries_in_all = set(datasets[0].available_countries)
+    for ds in datasets[1:]:
+        countries_in_all &= set(ds.available_countries)
+
+    filtered = [c for c in gap_countries if c in countries_in_all]
+    discarded = len(gap_countries) - len(filtered)
+    if discarded:
+        print(
+            f"{discarded} country/countries discarded — "
+            f"not present in all {len(datasets)} skill-category datasets."
+        )
+    gap_countries = filtered
     print(f"{len(gap_countries)} countries identified with skill gaps.")
-    if gap_countries:
-        print(f"  Example: {gap_countries[:8]}")
 
     results = {
         "analyzer":      analyzer,

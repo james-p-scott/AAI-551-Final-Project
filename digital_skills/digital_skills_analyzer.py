@@ -657,7 +657,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from digital_skills.ict_skills_dataset import ICTSkillsDataset
 
-    print("=== DigitalSkillsAnalyzer smoke test ===\n")
+    print("DigitalSkillsAnalyzer smoke test\n")
     ds_safety = ICTSkillsDataset("safety")
     ds_problem = ICTSkillsDataset("problem-solving")
     analyzer = DigitalSkillsAnalyzer([ds_safety, ds_problem])
