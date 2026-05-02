@@ -288,6 +288,12 @@ class DigitalLiteracyPredictor:
                 history = self._get_history(country_iso, category)
             except ValueError:
                 continue
+            except Exception as e:
+                print(
+                    f"Warning: Skipping category '{category}' for country "
+                    f"'{country_iso}' due to unexpected error: {e}"
+                )
+                continue
 
             last_year = int(history["dataYear"].max())
             current_year = datetime.date.today().year

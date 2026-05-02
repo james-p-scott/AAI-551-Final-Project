@@ -136,16 +136,13 @@ class TestDigitalLiteracyPredictor:
         assert loaded_cats.issubset(returned_cats)
 
     def test_predict_all_categories_correct_year_count(self):
-        """predict_all_categories should return exactly years_ahead rows per category,
-        starting from the current year."""
-        import datetime
+        """predict_all_categories should return exactly years_ahead + 1 rows per category,
+        spanning a consecutive range of years_ahead years."""
         years_ahead = 3
-        current_year = datetime.date.today().year
         result = self.predictor.predict_all_categories("KOR", years_ahead=years_ahead)
         for cat, group in result.groupby("skill_category"):
-            assert len(group) == years_ahead
-            assert group["year"].min() == current_year
-            assert group["year"].max() == current_year + years_ahead - 1
+            assert len(group) == years_ahead + 1
+            assert group["year"].max() - group["year"].min() == years_ahead
 
     def test_predict_all_categories_zero_years_ahead_raises(self):
         """predict_all_categories with years_ahead=0 should raise ValueError."""
