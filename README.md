@@ -36,9 +36,21 @@ e)	Evaluate the impact of age and demographic factors on the size and growth rat
 ### File/Module Structure
 The main function resides in AAI-551-Final-Project.ipynb with all other classes and functions contained in .py files that are imported into the proper namespace.
 
-Top Level of Hierarchy : AAI-551_Final-Project.ipynb (contains the __main__ program)<br>
-Second Level of Hierarchy : global_internet_access.py<br>
-Third Level of Hierarchy : file_io.py<br>
+```
+AAI-551_Final-Project.ipynb         — main program (entry point)
+file_io.py                          — CSV data loading utility (CSV_Load_DF class)
+global_internet_access.py           — global internet access analysis module
+load_ict_data.py                    — ICT data loading helpers
+digital_skills/                     — digital literacy & ICT skills analysis package
+    __init__.py                     — package exports
+    ict_skills_dataset.py           — ICTSkillsDataset class (loads one ITU skill-category CSV)
+    digital_skills_analyzer.py      — DigitalSkillsAnalyzer class (cross-category analysis & visualization)
+    digital_skills_analysis.py      — top-level entry-point functions called from the notebook
+    digital_literacy_predictor.py   — DigitalLiteracyPredictor class (linear regression forecasting)  
+    tests/
+        test_ict_skills.py          — pytest test suite for the digital_skills package
+datasets/                           — ITU CSV data files
+```
 
 ### Python Version Used
 Python 3.14.3
@@ -47,3 +59,32 @@ Python 3.14.3
 1. The International Telecommunications Union (ITU) provides a public dataset (1975-2025) of annual Digital Divide related statistics. https://datahub.itu.int 
 2. The United Nations provides a large collection of public datasets (2010-2025), one of which reflects the global population, per country. https://data.un.org 
 3. The World Bank provides a dataset (1960-2025) that relate to economic indicators for each country in the world https://datacatalog.worldbank.org/home  
+
+## How to Run the Program
+1. Clone the repository and open `AAI-551_Final-Project.ipynb` in Jupyter or VS Code.
+2. Ensure the `datasets/` directory is present at the project root with all ITU CSV files.
+3. Install required libraries: `pip install pandas numpy matplotlib torch pytest`
+4. Run all notebook cells in order.
+
+To run the pytest test suite:
+```
+python -m pytest digital_skills/tests/ -v
+```
+*(to be updated with additional test cases as development progresses)*
+
+## Main Contributions of Each Team Member
+
+### Jeff Busold — Digital Literacy & ICT Skills Analysis
+Analyzed the impact of digital literacy and ICT skills on the Digital Divide using ITU skill-category datasets. Contributions include:
+- `digital_skills/ict_skills_dataset.py` — `ICTSkillsDataset` class: loads a single ITU ICT skill-category CSV and provides filtered views by country, year, gender, age group, and urban/rural geography.
+- `digital_skills/digital_skills_analyzer.py` — `DigitalSkillsAnalyzer` class: composes multiple `ICTSkillsDataset` instances to enable cross-category ranking, skill gap identification, trend analysis, gender gap analysis, age-group distribution analysis, and matplotlib visualizations.
+- `digital_skills/digital_skills_analysis.py` — top-level entry-point functions (`load_all_ict_skill_datasets`, `load_skill_level_summary`, `iter_country_data`, `run_digital_literacy_analysis`) called directly from the project notebook.
+- `digital_skills/digital_literacy_predictor.py` — `DigitalLiteracyPredictor` class: uses historical ITU skill-category data to train a simple linear regression model for predicting future digital literacy levels and plotting growth forecasts.
+- `digital_skills/__init__.py` — package exports for the above classes and functions.
+- `digital_skills/tests/` — pytest test suite
+
+### James Scott
+*(to be updated)*
+
+### Dominick Vovk
+*(to be updated)*
