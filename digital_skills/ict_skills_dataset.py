@@ -47,7 +47,7 @@ _LOCATION_MAP = {
 }
 
 
-class ICTSkillsDataset:
+class ICTSkillsDataset(file_io.CSV_Load_DF):
     """
     Loads and wraps one ITU ICT skill-category CSV as a pandas DataFrame,
     providing filtered views by country, year, gender, age group, and
@@ -81,9 +81,8 @@ class ICTSkillsDataset:
         datasets_dir = os.path.join(_PROJECT_ROOT, "datasets")
         filename = SKILL_CATEGORY_FILES[skill_category]
 
-        # Compose with teammate's CSV_Load_DF class to perform the actual load
-        _loader = file_io.CSV_Load_DF(datasets_dir, filename)
-        self.df: pd.DataFrame | None = _loader.df
+        # Inherit CSV_Load_DF to perform the actual load; sets self.df and self.filepath
+        super().__init__(datasets_dir, filename)
 
         # Build convenience index lists (mutable) from the loaded data
         if self.df is not None:
