@@ -28,19 +28,30 @@ e)	Evaluate the impact of age and demographic factors on the size and growth rat
 - Each team member must update the project README.md file when they commit new or modified (properly documented) code into the GitHub repo
 
 ### External Libraries
- - NumPy - an open-source used for scientific computing and performing high-performance mathematical operations on large, multi-dimensional data structures
+ - Matplotlib - an open-source library used to provide python data visualization capabilities
  - Pandas - an open-source library used for data manipulation, analysis, and cleaning
- - GeoPandas - open-source extensions to Pandas that allows spatial operations to be performed on geometric types
- - TensorFlow - an open-source library developed by Google Brain to simplify the development and deployment of Machine Learning and Deep Learning models (c.f. PyTorch or Keras)
+ - Pytest - an open-source library used to provide python with a unit-testing framework
+ - PyTorch - an open-source ML framework used to build and train neural networks in Python
+
+### Built-In Libraries
+ - datatime - a built-in python standard library that provides specialized classes for manipulating dates, times, and time intervals
+ - importlib - a built-in python standard library that provides a programmatic interface for interacting with the Python import system
+ - math - a built-in python standard library that provides math functions and constants for real numbers
+ - os - a built-in python standard library that provides portable methods for interacting with the underlying operating system (os)
+ - statistics - a built-in python standard library used for calculating statistics of numeric data
+ - sys - a built-in python standard library that provides access to variables and functions used by the Python interpreter
+ - Warnings - a built-in python standard library used to notify users and developers of non-critical issues encountered at run-time
 
 ### File/Module Structure
 The main function resides in AAI-551-Final-Project.ipynb with all other classes and functions contained in .py files that are imported into the proper namespace.
 
 ```
 AAI-551_Final-Project.ipynb         — main program (entry point)
-file_io.py                          — CSV data loading utility (CSV_Load_DF class)
-global_internet_access.py           — global internet access analysis module
+file_io.py                          — CSV data loading utility (CSV_Load_DF, Logging_CSV_Load_DF, and Clean_DF classes)
+global_internet_access.py           — global internet access analysis and visualization module
 load_ict_data.py                    — ICT data loading helpers
+tests/
+    test_data_cleaing.py            - pytest test suite for the data cleaning functions in the main branch
 digital_skills/                     — digital literacy & ICT skills analysis package
     __init__.py                     — package exports
     ict_skills_dataset.py           — ICTSkillsDataset class (loads one ITU skill-category CSV)
