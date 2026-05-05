@@ -121,6 +121,10 @@ price_results = run_price_regulation_analysis(
 ```
 
 ```python
+price_results["stats"]
+```
+
+```python
 price_results["analyzer"].plot_regulation_counts()
 ```
 
@@ -130,6 +134,15 @@ price_results["analyzer"].plot_average_internet_usage()
 
 ```python
 price_results["low_access_without_control"].head(20)
+```
+
+```python
+
+import matplotlib.pyplot as plt
+
+price_results["analyzer"].plot_low_access_without_control(threshold=60.0, top_n=15)
+plt.show()
+
 ```
 
 The mobile internet price regulation analysis lets us determine whether retail internet access and data service price controls are associated with internet usage across countries. Therefore, the ITU mobile services dataset was cleaned and filtered to focus only on the indicator for retail internet access and data services, where the latest available regulation status for each country was selected, and then merged with the latest available internet usage percentage from the global internet access dataset. Moreover, countries were grouped by whether they had price control or no price control, and the average internet usage rate was compared between those groups. This supports the Digital Divide project because affordability is one of the major reasons that internet access can remain unequal across countries. The results show an association between price regulation and internet access, but they do not prove that price regulation directly causes higher access because income, infrastructure, education, and geography may also influence internet usage.
