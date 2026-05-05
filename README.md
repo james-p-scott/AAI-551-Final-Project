@@ -7,7 +7,7 @@
 |---------------|--------------------------|------------|---------------|
 | Jeff Busold   | jbusold@stevens.edu      |  20006079  |  OverkillLC   |
 | James Scott   | james.p.scott@boeing.com |  10311319  | james-p-scott |
-| Dominick Vovk | dvovk1015@gmail.com      |  20002381  |               |
+| Dominick Vovk | dvovk1015@gmail.com      |  20002381  | domvovk       |
 |---------------|--------------------------|------------|---------------|
 
 ## Problem Description
@@ -97,5 +97,40 @@ Analyzed the impact of digital literacy and ICT skills on the Digital Divide usi
 ### James Scott
 *(to be updated)*
 
-### Dominick Vovk
-*(to be updated)*
+### Dominick Vovk — Mobile Internet Price Regulation Analysis
+
+This section analyzes mobile Internet/data price regulation as a policy and affordability factor in the Digital Divide. The ITU dataset is filtered to the indicator **Price regulation of retail Internet access and data services**. The cleaned regulation data is then merged with the existing `individuals-using-the-internet.csv` dataset so that countries with and without price control can be compared by internet usage.
+
+### Files
+
+- `price_regulation/price_regulation_dataset.py` — loads, cleans, filters, and merges the ITU datasets.
+- `price_regulation/price_regulation_analyzer.py` — calculates summary statistics, finds low-access countries without price control, ranks countries, and creates charts.
+- `price_regulation/price_regulation_analysis.py` — top-level runner for the notebook.
+- `price_regulation/tests/` — pytest unit tests for the dataset and analyzer classes.
+
+### Notebook cells
+
+```python
+from price_regulation.price_regulation_analysis import run_price_regulation_analysis
+
+price_results = run_price_regulation_analysis(
+    price_file="mobile-services_1778017040787.csv",
+    internet_file="individuals-using-the-internet.csv",
+    data_dir="datasets"
+)
+```
+
+```python
+price_results["analyzer"].plot_regulation_counts()
+```
+
+```python
+price_results["analyzer"].plot_average_internet_usage()
+```
+
+```python
+price_results["low_access_without_control"].head(20)
+```
+
+The mobile Internet price regulation analysis evaluates whether retail Internet access and data service price controls are associated with internet usage across countries. The ITU mobile services dataset was cleaned and filtered to focus only on the indicator for retail Internet access and data services. The latest available regulation status for each country was selected, then merged with the latest available internet usage percentage from the global internet access dataset. Countries were grouped by whether they had price control or no price control, and the average internet usage rate was compared between those groups. This supports the Digital Divide project because affordability is one of the major reasons that internet access can remain unequal across countries. The results show an association between price regulation and internet access, but they do not prove that price regulation directly causes higher access because income, infrastructure, education, and geography may also influence internet usage.
+
