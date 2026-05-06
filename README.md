@@ -235,6 +235,14 @@ sequenceDiagram
     end
     Note over Notebook,MPL: Multiple paginated figures displayed
 ```
+#### Horizontal Bar Plots of ITU Dataset (% individual usage per country) - Global Internet Access Analysis
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/2a437437-fef9-4e6d-b366-2a5c4381cb7c" />
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/143a0666-b04e-4baa-a618-ff7ca0e6383b" />
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/868b40c0-b64a-41e6-8871-09ba130a90f3" />
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/5fa6ba0f-bf2f-45d2-aeec-df4b3c5e3b55" />
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/7f30a56c-affc-4c49-9a97-1dce0579804d" />
+<img width="1389" height="690" alt="image" src="https://github.com/user-attachments/assets/a3e4fb53-0a6b-4952-b725-d825d0cdf365" />
+
 
 ### Dominick Vovk — Mobile Internet Price Regulation Analysis
 
