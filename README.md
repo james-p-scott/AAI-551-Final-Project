@@ -95,7 +95,44 @@ Analyzed the impact of digital literacy and ICT skills on the Digital Divide usi
 - `digital_skills/tests/` — pytest test suite
 
 ### James Scott
-*(to be updated)*
+#### Class Diagram - Global Internet Access Analysis
+'''
+```mermaid
+classDiagram
+    %% Classes from file_io.py / usage in the project
+    class CSV_Load_DF {
+        +filepath: str
+        +df: pandas.DataFrame | None
+        +CSV_Load_DF(subdirectory, filename)
+        +__str__() str
+        +__len__() int
+        +__getattr__(name)
+        +load_df()
+    }
+
+    class Logging_CSV_Load_DF {
+        +Logging_CSV_Load_DF(subdirectory, filename)
+        +load_df()
+        +static walk_nested_dict(d, prefix=())
+    }
+
+    class Clean_DF {
+        +CORE_COLUMNS: list
+        +loader: CSV_Load_DF
+        +df: pandas.DataFrame | None
+        +Clean_DF(loader=None, subdir=None, filename=None)
+        +__str__() str
+        +__getattr__(name)
+        +reduce_to_core_columns()
+        +reduce_to_latest_by_iso(iso_col="entityIso", year_col="dataYear", value_col="dataValue")
+    }
+
+    %% Inheritance: Logging_CSV_Load_DF extends CSV_Load_DF
+    CSV_Load_DF <|-- Logging_CSV_Load_DF
+
+    %% Composition: Clean_DF "has-a" CSV_Load_DF loader
+    CSV_Load_DF *-- Clean_DF
+```
 
 ### Dominick Vovk — Mobile Internet Price Regulation Analysis
 
