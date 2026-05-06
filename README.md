@@ -133,6 +133,105 @@ classDiagram
     %% Composition: Clean_DF "has-a" CSV_Load_DF loader
     CSV_Load_DF *-- Clean_DF
 ```
+#### Summary of Workflow for Global Internet Access analysis
+This code contains the end-to-end utilities used to (a) load the ITU global internet access dataset (.csv format), (b) clean and normalize the dataset into
+a sorted dataframe that can be plotted, and (c) create a series of horizontal bar charts that indentify the % of individual internet usage by the population
+of each country on earth.
+
+Primary Modules and Entry Point:
+1.  AAI-551_Final-Project.ipynb
+    Notebook entry: imports global_internet_access and runs the three-step orchestration (load → clean → plot) guarded by if \_\_name\_\_ == "\_\_main\_\_":
+2.  global_internet_access.py
+    Top-level of hierarchy: load_global_internet_access_data(), clean_global_internet_access_data(), plot_cleaned_internet_bar(),
+    plot_all_cleaned_internet_bars(), plot_cleaned_internet_in_n_plots().
+    Responsibilities: orchestrate file loading via file_io classes, apply cleaning rules (drop embedded headers, normalize percentages, keep latest by ISO), 
+    and plot results with consistent axes and batching.
+3.  file_io.py
+    Classes: CSV_Load_DF (base loader), Logging_CSV_Load_DF (subclass that logs), Clean_DF (composition-based cleaner).
+    Responsibilities: build file path, read CSV into pandas.DataFrame, provide attribute delegation (__getattr__), operator overloads (__len__, __str__),
+    error handling for read failures, and DataFrame cleaning utilities (reduce_to_core_columns, reduce_to_latest_by_iso).
+
+Orchestration and Workflow:
+1.  Load raw CSV
+    load_global_internet_access_data() (via Logging_CSV_Load_DF) constructs filepath, attempts pd.read_csv, prints sample rows and flattened metadata via
+    walk_nested_dict, and returns the loader whose df holds the raw DataFrame (or None on failure).
+2.  Build cleaner and reduce to core schema
+    clean_global_internet_access_data() constructs a CSV_Load_DF loader (or uses an existing one) and a Clean_DF wrapper that holds a working copy of loader.df.
+    Calls reduce_to_core_columns() to:
+        (a) compute intersection with CORE_COLUMNS,
+        (b) drop other columns (or create empty DataFrame if no core columns),
+        (c) coerce dataValue and dataYear to numeric (nullable year dtype), and
+        (d) return/assign the reduced DataFrame.
+3.  Remove embedded header rows and keep latest per ISO
+    Detect rows where any cell equals its column name (case-insensitive); drop those rows.
+    Call reduce_to_latest_by_iso() to:
+        (a) coerce value and year columns,
+        (b) drop rows with invalid values,
+        (c) normalize ISO codes (uppercase, stripped),
+        (d) sort by ISO and year descending,
+        (e) keep the most recent row per ISO and assign it back to self.df
+4.  Normalize values and sort
+    Convert dataValue from percent to fraction if values > 1.0 (in both cleaner and plotting helpers).
+    Sort cleaned data by dataValue descending.
+5.  Plotting (using multiple helpers)
+    plot_cleaned_internet_bar(df, ...):
+        (a) validate input,
+        (b) coerce numeric,
+        (c) drop NaNs,
+        (d) restrict to top_n,
+        (e) draw a horizontal bar chart with percentage-formatted x-axis,
+        (f) optionally enforce fixed y_limits.
+    plot_all_cleaned_internet_bars(df, batch_size=...):
+        (a) compute a global y-range from the entire dataset (clamped to [0,1]),
+        (b) split sorted data into batches of batch_size,
+        (c) call plot_cleaned_internet_bar() for each batch using shared y_limits.
+    plot_cleaned_internet_in_n_plots(df, num_plots=...):
+        (a) divide sorted data into num_plots batches (first P-1 get base rows, final gets base + remainder),
+        (b) compute consistent y_limits,
+        (c) call the bar plot helper for each batch.
+6.  The Jupyter Notebook cell used for global internet access orchestration runs the loader, cleans the df, and plots the cleaned/sorted dataset
+
+#### Sequence Diagram of Workflow - Global Internet Access Analysis
+```mermaid
+sequenceDiagram
+    participant Notebook as AAI-551 Notebook (main)
+    participant GIA as global_internet_access
+    participant LogLoader as file_io.Logging_CSV_Load_DF
+    participant Loader as file_io.CSV_Load_DF
+    participant Cleaner as file_io.Clean_DF
+    participant Pandas as pandas
+    participant MPL as matplotlib
+
+    Note over Notebook,GIA: Entry point runs: load -> clean -> plot
+
+    Notebook->>GIA: call `load_global_internet_access_data()`
+    GIA->>LogLoader: instantiate `Logging_CSV_Load_DF("datasets", file)`
+    LogLoader->>Pandas: `pd.read_csv(filepath)` (inside `load_df()`)
+    Pandas-->>LogLoader: DataFrame or raise error
+    LogLoader-->>GIA: return loader (with `df`)
+    GIA-->>Notebook: return loader
+
+    Notebook->>GIA: call `clean_global_internet_access_data()`
+    GIA->>Loader: instantiate `CSV_Load_DF("datasets", file)` (if not reusing loader)
+    Loader->>Pandas: `pd.read_csv(filepath)` (load)
+    Loader-->>GIA: return loader with `df`
+    GIA->>Cleaner: instantiate `Clean_DF(loader=loader)`
+    Cleaner->>Cleaner: `reduce_to_core_columns()` (intersect columns, coerce types)
+    Cleaner->>Cleaner: drop embedded header-like rows (mask)
+    Cleaner->>Cleaner: `reduce_to_latest_by_iso()` (normalize iso, sort, dedupe)
+    Cleaner-->>GIA: return cleaned `DataFrame`
+    GIA-->>Notebook: return cleaned_df
+
+    Notebook->>GIA: call `plot_cleaned_internet_in_n_plots(cleaned_df, num_plots)`
+    GIA->>GIA: compute batch_sizes and y_limits
+    loop for each batch
+        GIA->>GIA: prepare subset for batch
+        GIA->>GIA: call `plot_cleaned_internet_bar(subset, y_limits)`
+        GIA->>MPL: build barh plot (axes, formatting)
+        MPL-->>GIA: show figure (`plt.show()`)
+    end
+    Note over Notebook,MPL: Multiple paginated figures displayed
+```
 
 ### Dominick Vovk — Mobile Internet Price Regulation Analysis
 
