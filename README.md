@@ -67,7 +67,10 @@ datasets/                           — ITU CSV data files
 Python 3.14.3
 
 ## Publicly Available Datasets
-1. The International Telecommunications Union (ITU) provides a public dataset (1975-2025) of annual Digital Divide related statistics. https://datahub.itu.int 
+### Primary Dataset Used
+1. The International Telecommunications Union (ITU) provides a public dataset (1975-2025) of annual Digital Divide related statistics. https://datahub.itu.int
+
+### Alternative Dataset Sources Available for use (not used by this Final Project but included for completeness)
 2. The United Nations provides a large collection of public datasets (2010-2025), one of which reflects the global population, per country. https://data.un.org 
 3. The World Bank provides a dataset (1960-2025) that relate to economic indicators for each country in the world https://datacatalog.worldbank.org/home  
 
