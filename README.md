@@ -1,6 +1,8 @@
 # AAI-551-Final-Project
 # Evaluating the Digital Divide - Characterizing the Key Underlying Aspects that Drive Disparities in Access
 
+## GitHub Repo URL: https://github.com/james-p-scott/AAI-551-Final-Project
+
 ## Team Members
 |---------------|--------------------------|------------|---------------|
 |      NAME     |       EMAIL ADDRESS      | STEVENS ID |    GitHub ID  |
