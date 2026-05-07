@@ -31,7 +31,7 @@ e)	Evaluate the impact of age and demographic factors on the size and growth rat
  - Matplotlib - an open-source library used to provide python data visualization capabilities
  - Pandas - an open-source library used for data manipulation, analysis, and cleaning
  - Pytest - an open-source library used to provide python with a unit-testing framework
- - PyTorch - an open-source ML framework used to build and train neural networks in Python
+ - torch - PyTorch is an open-source ML framework used to build and train neural networks in Python
 
 ### Built-In Libraries
  - datatime - a built-in python standard library that provides specialized classes for manipulating dates, times, and time intervals
@@ -60,6 +60,13 @@ digital_skills/                     — digital literacy & ICT skills analysis p
     digital_literacy_predictor.py   — DigitalLiteracyPredictor class (linear regression forecasting)  
     tests/
         test_ict_skills.py          — pytest test suite for the digital_skills package
+price_regulation/                   - analysis of Information and Communications Technology data
+    price_regulaton_analysis.py     - orchestration of price regulation analysis
+    price_regulation_analyzer.py    - analyzes price regulaton and internet usage data
+    price_regulation_dataset.py     - loads and cleans price regulation and internet usage data
+    tests/
+        test_price_regulation_analyzer.py - unit test for price regulation analyzer
+        test_price_regulation_dataset.py  - unit test for price regulation dataset loading and cleaning
 datasets/                           — ITU CSV data files
 ```
 
@@ -77,7 +84,8 @@ Python 3.14.3
 ## How to Run the Program
 1. Clone the repository and open `AAI-551_Final-Project.ipynb` in Jupyter or VS Code.
 2. Ensure the `datasets/` directory is present at the project root with all ITU CSV files.
-3. Install required libraries: `pip install pandas numpy matplotlib torch pytest`
+3. Install required external libraries: `pip install pandas matplotlib torch pytest` or install Python Packages from the IDE (e.g. PyCharm) used to execute
+   AAI-551_Final-Project.ipynb 
 4. Run all notebook cells in order.
 
 To run the pytest test suite:
@@ -97,16 +105,43 @@ Analyzed the impact of digital literacy and ICT skills on the Digital Divide usi
 - `digital_skills/__init__.py` — package exports for the above classes and functions.
 - `digital_skills/tests/` — pytest test suite
 
+#### Global ICT Skills Distribution (Top and Bottom 10 Countries, 2020)
+<img width="1590" height="592" alt="image" src="https://github.com/user-attachments/assets/b7e97225-14db-47a9-91a9-73d6e79bd946" />
+
+#### Global ICT Skills Comparison (Denmark)
+<img width="1187" height="590" alt="image" src="https://github.com/user-attachments/assets/df672f38-faa9-495d-905e-ad0aaa8fb80c" />
+
+#### Global ICT Skills Growth Over Time (Ukraine)
+<img width="1187" height="590" alt="image" src="https://github.com/user-attachments/assets/8ccd17bd-1db7-455e-af29-ff5c560732bc" />
+
+#### Global ICT Skills Rate Forecast (Denmark)
+<img width="1187" height="590" alt="image" src="https://github.com/user-attachments/assets/a0a9295b-2646-4dbc-8dbc-82885a59fb0b" />
+
+#### Global ICT Skills Rate Forecast (Ukraine)
+<img width="1187" height="590" alt="image" src="https://github.com/user-attachments/assets/195d44fd-6ad8-440b-a05e-5626dea0da5e" />
+
+
 ### James Scott
 #### Class Diagram - Global Internet Access Analysis
-'''
 ```mermaid
 classDiagram
-    %% Classes from file_io.py / usage in the project
+    %% Inheritance relationships
+    Logging_CSV_Load_DF --|> CSV_Load_DF
+    ICTSkillsDataset --|> CSV_Load_DF
+    _TrendMLP --|> nn.Module
+
+    %% Composition / Aggregation relationships with cardinalities
+    Clean_DF *-- CSV_Load_DF : loader
+    DigitalSkillsAnalyzer "1" o-- "1..*" ICTSkillsDataset : manages
+    DigitalLiteracyPredictor "1" *-- "1" DigitalSkillsAnalyzer : composes
+    DigitalLiteracyPredictor "1" o-- "0..*" _TrendMLP : caches models
+    PriceRegulationAnalyzer "1" *-- "1" PriceRegulationDataset : composes
+
+    %% Classes and key members (types simplified for Mermaid compatibility)
     class CSV_Load_DF {
         +filepath: str
-        +df: pandas.DataFrame | None
-        +CSV_Load_DF(subdirectory, filename)
+        +df: DataFrame
+        +__init__(subdirectory, filename)
         +__str__() str
         +__len__() int
         +__getattr__(name)
@@ -114,27 +149,126 @@ classDiagram
     }
 
     class Logging_CSV_Load_DF {
-        +Logging_CSV_Load_DF(subdirectory, filename)
+        +__init__(subdirectory, filename)
         +load_df()
-        +static walk_nested_dict(d, prefix=())
+        +walk_nested_dict(d, prefix) <<static>>
     }
 
     class Clean_DF {
         +CORE_COLUMNS: list
         +loader: CSV_Load_DF
-        +df: pandas.DataFrame | None
-        +Clean_DF(loader=None, subdir=None, filename=None)
+        +df: DataFrame
+        +__init__(loader=None, subdir=None, filename=None)
         +__str__() str
         +__getattr__(name)
-        +reduce_to_core_columns()
-        +reduce_to_latest_by_iso(iso_col="entityIso", year_col="dataYear", value_col="dataValue")
+        +reduce_to_core_columns() DataFrame
+        +reduce_to_latest_by_iso(iso_col, year_col, value_col) DataFrame
     }
 
-    %% Inheritance: Logging_CSV_Load_DF extends CSV_Load_DF
-    CSV_Load_DF <|-- Logging_CSV_Load_DF
+    class ICTSkillsDataset {
+        +skill_category: str
+        +available_countries: list
+        +available_years: list
+        +__init__(skill_category: str)
+        +__str__() str
+        +__len__() int
+        +get_totals() DataFrame
+        +get_by_gender(gender: str) DataFrame
+        +get_by_age_group(age_band: str) DataFrame
+        +get_by_urban_rural(location: str) DataFrame
+        +filter_by_country(iso: str) DataFrame
+        +filter_by_year(year: int) DataFrame
+        +get_summary_stats() dict
+        -_require_loaded()
+    }
 
-    %% Composition: Clean_DF "has-a" CSV_Load_DF loader
-    CSV_Load_DF *-- Clean_DF
+    class DigitalSkillsAnalyzer {
+        +datasets: list
+        -_combined_df: DataFrame
+        -_skill_level_df: DataFrame
+        +__init__(datasets: list)
+        +__str__() str
+        +__add__(other: DigitalSkillsAnalyzer) DigitalSkillsAnalyzer
+        +rank_countries_by_skill(skill_category, year, top_n) DataFrame
+        +identify_skill_gaps(threshold: float) list
+        +compare_skill_categories(country_iso: str, year) dict
+        +compare_basic_vs_above_basic(country_iso, year) DataFrame
+        +analyze_skill_trends(country_iso: str) DataFrame
+        +analyze_gender_gap(country_iso: str) DataFrame
+        +analyze_age_group_distribution(country_iso: str, age_bands: tuple) DataFrame
+        +plot_global_skill_distribution(year) Figure
+        +plot_skill_category_comparison(countries_list: list, year) Figure
+        +plot_gender_gap(countries_list: list, skill_category: str) Figure
+        +plot_skill_growth(country_iso: str) Figure
+        -_get_combined_totals() DataFrame
+        -_get_dataset(skill_category: str) ICTSkillsDataset
+        -_get_skill_level_df() DataFrame
+    }
+
+    class _TrendMLP {
+        +net: Sequential
+        +__init__()
+        +forward(x) Tensor
+    }
+
+    class DigitalLiteracyPredictor {
+        +analyzer: DigitalSkillsAnalyzer
+        +_models: dict
+        +__init__(analyzer: DigitalSkillsAnalyzer)
+        +__str__() str
+        +fit(country_iso: str, skill_category: str, epochs: int, lr: float) dict
+        +predict(country_iso: str, skill_category: str, years: list) DataFrame
+        +predict_all_categories(country_iso: str, years_ahead: int) DataFrame
+        +plot_predicted_growth(country_iso: str, years_ahead: int) Figure
+        -_get_history(country_iso: str, skill_category: str) DataFrame
+        -_normalise(years, mean: float, std: float) Tensor <<static>>
+    }
+
+    class PriceRegulationDataset {
+        +target_series: str
+        +price_file: str
+        +internet_file: str
+        +data_dir: str
+        +price_df: DataFrame
+        +internet_df: DataFrame
+        +clean_price_df: DataFrame
+        +clean_internet_df: DataFrame
+        +merged_df: DataFrame
+        +__init__(price_file, internet_file, data_dir)
+        +__str__() str
+        +__len__() int
+        +__getattr__(name)
+        +load_price_data() DataFrame
+        +load_internet_data() DataFrame
+        +clean_price_data() DataFrame
+        +clean_internet_data() DataFrame
+        +latest_price_by_country() DataFrame
+        +latest_internet_by_country() DataFrame
+        +merge_with_internet_usage() DataFrame
+        +filter_by_country(iso: str) DataFrame
+        +recursive_country_count(countries: list) int
+        -_path(filename: str) str
+    }
+
+    class PriceRegulationAnalyzer {
+        +dataset: PriceRegulationDataset
+        +df: DataFrame
+        +__init__(dataset: PriceRegulationDataset)
+        +__str__() str
+        +get_summary_stats() dict
+        +regulation_counts_by_year() DataFrame
+        +get_low_access_without_control(threshold: float) DataFrame
+        +rank_countries_by_internet_usage(top_n: int, lowest: bool) DataFrame
+        +iter_country_results() generator
+        +plot_regulation_counts() Figure
+        +plot_average_internet_usage() Figure
+        +plot_low_access_without_control(threshold: float, top_n: int) Figure
+    }
+
+    %% External class (from PyTorch), shown for context
+    class nn.Module {
+        <<external>>
+    }
 ```
 #### Summary of Workflow for Global Internet Access analysis
 This code contains the end-to-end utilities used to (a) load the ITU global internet access dataset (.csv format), (b) clean and normalize the dataset into
@@ -294,3 +428,11 @@ plt.show()
 
 The mobile internet price regulation analysis lets us determine whether retail internet access and data service price controls are associated with internet usage across countries. Therefore, the ITU mobile services dataset was cleaned and filtered to focus only on the indicator for retail internet access and data services, where the latest available regulation status for each country was selected, and then merged with the latest available internet usage percentage from the global internet access dataset. Moreover, countries were grouped by whether they had price control or no price control, and the average internet usage rate was compared between those groups. This supports the Digital Divide project because affordability is one of the major reasons that internet access can remain unequal across countries. The results show an association between price regulation and internet access, but they do not prove that price regulation directly causes higher access because income, infrastructure, education, and geography may also influence internet usage.
 
+#### Mobile Internet/Data Price Regulation
+<img width="690" height="490" alt="image" src="https://github.com/user-attachments/assets/f4919cfd-720f-4c06-8235-4a7524c05ea5" />
+
+#### Average Internet Usage by Price Regulation Status
+<img width="690" height="490" alt="image" src="https://github.com/user-attachments/assets/bf24bdaa-4c45-40a4-b3d8-a8bd80be1588" />
+
+#### Low Internet Usage Countries Without Price Control
+<img width="989" height="590" alt="image" src="https://github.com/user-attachments/assets/29987bd6-1dda-4481-b09a-d6575562becc" />
