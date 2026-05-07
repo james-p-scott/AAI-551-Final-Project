@@ -122,7 +122,7 @@ Analyzed the impact of digital literacy and ICT skills on the Digital Divide usi
 
 
 ### James Scott
-#### Class Diagram - Global Internet Access Analysis
+#### Class Diagram - Global Internet Access Analysis, Digital Skills Analysis, and Price Regulation Analysis
 ```mermaid
 classDiagram
     %% Inheritance relationships
