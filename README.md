@@ -1,16 +1,17 @@
 # AAI-551-Final-Project
 # Evaluating the Digital Divide - Characterizing the Key Underlying Aspects that Drive Disparities in Access
 
-## GitHub Repo URL: https://github.com/james-p-scott/AAI-551-Final-Project
+## GitHub Repo URL
+https://github.com/james-p-scott/AAI-551-Final-Project
 
 ## Team Members
-|---------------|--------------------------|------------|---------------|
+
 |      NAME     |       EMAIL ADDRESS      | STEVENS ID |    GitHub ID  |
 |---------------|--------------------------|------------|---------------|
 | Jeff Busold   | jbusold@stevens.edu      |  20006079  |  OverkillLC   |
 | James Scott   | james.p.scott@boeing.com |  10311319  | james-p-scott |
 | Dominick Vovk | dvovk1015@gmail.com      |  20002381  | domvovk       |
-|---------------|--------------------------|------------|---------------|
+
 
 ## Problem Description
 ### Project Overview
